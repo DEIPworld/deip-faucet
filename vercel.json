@@ -1,0 +1,10 @@
+{
+    "functions": {
+        "api/request.js": {
+            "includeFiles": "_files/records.json"
+        },
+        "api/records.js": {
+            "includeFiles": "_files/records.json"
+        }
+    }
+}
