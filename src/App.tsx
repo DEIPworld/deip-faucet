@@ -24,7 +24,7 @@ import {
   Stack
 } from '@chakra-ui/react';
 
-import { CopyIcon, CheckIcon, SmallCloseIcon } from '@chakra-ui/icons';
+import { CopyIcon } from '@chakra-ui/icons';
 import { ColorModeSwitcher } from './ColorModeSwitcher';
 import { IoLogoTwitter } from 'react-icons/io';
 
@@ -51,7 +51,9 @@ function Main() {
       .then(res => res.data)
       .then(({ data }) => {
         setIsLoading(false);
-        setListItems(data);
+        if (data && data.length) {
+          setListItems(data);
+        }
       });
   }
 

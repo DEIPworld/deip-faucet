@@ -98,15 +98,16 @@ exports.handler = async (req) => {
       })
     }
   }
-  const { url } = req.body;
-  const idMatch = /status\/(\d+)/ig.exec(url);
+  const { url } = JSON.parse(req.body);
+  const idMatch = /status\/(\d+)/ig.exec(url || '');
   if (!idMatch) {
-    return toast({
-      position: 'top-right',
-      title: 'Error',
-      description: 'Twitter url invalid',
-      status: 'error'
-    });
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        success: false,
+        message: 'Twitter url invalid',
+      })
+    };
   }
   const id = idMatch[1];
 
