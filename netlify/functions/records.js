@@ -12,15 +12,18 @@ const pgPool = new Pool({
   max: 20
 });
 
-module.exports = async (req, res) => {
+exports.handler = async (req) => {
   const pgClient = await pgPool.connect();
 
   const { rows } = await pgClient.query(
     'SELECT * FROM records ORDER BY id desc LIMIT 3', 
   );
 
-  res.json({
-    data: rows,
-    total: rows.length
-  });
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      data: rows,
+      total: rows.length
+    })
+  }
 };

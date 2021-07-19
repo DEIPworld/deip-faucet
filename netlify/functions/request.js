@@ -88,9 +88,15 @@ const getFaucetAccount = async () => {
 
 // createTable();
 
-module.exports = async (req, res) => {
+exports.handler = async (req) => {
   if (!req.body) {
-    return res.json({ success: false, message: 'Missing parameter(s)' });
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ 
+        success: false, 
+        message: 'Missing parameter(s)' 
+      })
+    }
   }
   const { url } = req.body;
   const idMatch = /status\/(\d+)/ig.exec(url);
@@ -181,14 +187,22 @@ module.exports = async (req, res) => {
       Math.ceil(new Date().getTime()/1000)
     ]);
 
-    res.json({ success: true });
+    return { 
+      statusCode: 200,
+      body: JSON.stringify({
+        success: true 
+      })
+    }
 
   } catch(err) {
     console.log(err);
-    res.json({
-      success: false,
-      message: err.toString()
-    })
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        success: false,
+        message: err.toString()
+      })
+    }
   }
   
 };

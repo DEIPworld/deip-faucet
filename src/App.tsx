@@ -47,7 +47,7 @@ function Main() {
   const getListItems = async () => {
     setIsLoading(true);
     axios
-      .get('/api/records')
+      .get('/.netlify/functions/records')
       .then(res => res.data)
       .then(({ data }) => {
         setIsLoading(false);
@@ -72,7 +72,7 @@ function Main() {
     }
     setIsSubmiting(true);
     await axios
-      .post('/api/request', { url })
+      .post('/.netlify/functions/request', { url })
       .then(res => res.data)
       .then(data => {
         if (data.success) {
