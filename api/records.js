@@ -1,16 +1,26 @@
-const { readFileSync } = require('fs');
-const { join } = require('path');
+const { Pool } = require('pg');
 
-const recordsFile = join(__dirname, '_files', 'records.json');
-const recordsData = readFileSync(recordsFile, 'utf8') || '{}';
+const pgUrl = process.env.PG_URL;
+const match = /(.*):(.*)@(.*)\/(.*)/.exec(pgUrl);
 
-const records = JSON.parse(recordsData);
+const pgPool = new Pool({
+  host: match[3],
+  user: match[1],
+  password: match[2],
+  database: match[4],
+  port: 5432,
+  max: 20
+});
 
-module.exports = (req, res) => {
-  const keys = Object.keys(records);
+module.exports = async (req, res) => {
+  const pgClient = await pgPool.connect();
+
+  const { rows } = await pgClient.query(
+    'SELECT * FROM records ORDER BY id desc LIMIT 3', 
+  );
 
   res.json({
-    data: keys.length ? keys.slice(-5).map(key => records[key]) : [],
-    total: records.length
+    data: rows,
+    total: rows.length
   });
 };

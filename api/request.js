@@ -1,10 +1,9 @@
 
 const { connect, keyStores, Contract, utils, Account, WalletConnection, Connection } = require('near-api-js');
-const { readFileSync, writeFileSync } = require('fs');
-const axios = require('axios');
 
+const axios = require('axios');
+const { Pool } = require('pg');
 const BN = require('bn.js');
-const { join } = require('path');
 const duration = require('dayjs/plugin/duration');
 const relativeTime = require('dayjs/plugin/relativeTime');
 
@@ -13,16 +12,23 @@ const dayjs = require('dayjs');
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
 
-const recordsFile = join(__dirname, '_files', 'records.json');
-const recordsData = readFileSync(recordsFile, 'utf8') || '{}';
-
 const TOKEN_CONTRACT_NAME = 'oct-token.testnet';
 const DEFAULT_GAS = new BN('300000000000000');
 
-const records = JSON.parse(recordsData);
-
 const faucetPrivKey = process.env.FAUCET_PRIV_KEY;
 const twitterAuth = process.env.TWITTER_AUTH;
+const pgUrl = process.env.PG_URL;
+
+const match = /(.*):(.*)@(.*)\/(.*)/.exec(pgUrl);
+
+const pgPool = new Pool({
+  host: match[3],
+  user: match[1],
+  password: match[2],
+  database: match[4],
+  port: 5432,
+  max: 20
+});
 
 const getGuestToken = async () => {
   return axios({
@@ -65,6 +71,23 @@ const getFaucetAccount = async () => {
   };
 }
 
+// async function createTable() {
+ 
+//   const client = await pgPool.connect();
+//   await client.query(`
+//     CREATE TABLE records(
+//       id serial, 
+//       account varchar, 
+//       link varchar, 
+//       receipt varchar, 
+//       time int
+//     )
+//   `);
+ 
+// }
+
+// createTable();
+
 module.exports = async (req, res) => {
   if (!req.body) {
     return res.json({ success: false, message: 'Missing parameter(s)' });
@@ -80,6 +103,7 @@ module.exports = async (req, res) => {
     });
   }
   const id = idMatch[1];
+
   try {
     const tweet = await getTweet(id);
     const match = /\[(.*).testnet/i.exec(tweet);
@@ -88,8 +112,15 @@ module.exports = async (req, res) => {
     }
     const sendTo = match[1] + '.testnet';
     
-    const record = records[sendTo];
-    if (record) {
+    const pgClient = await pgPool.connect();
+
+    const { rows } = await pgClient.query(
+      'SELECT * FROM records WHERE account = $1 ORDER BY id desc LIMIT 1', 
+      [sendTo]
+    );
+
+    if (rows.length) {
+      const record = rows[0];
       const time = dayjs(record.time * 1000);
       if (dayjs().diff(time, 'h') < 24) {
         const d = dayjs.duration(time.add(1, 'days').diff(dayjs()))['$d'];
@@ -140,14 +171,15 @@ module.exports = async (req, res) => {
       attachedDeposit: 1
     });
     
-    records[sendTo] = {
-      account: sendTo,
-      link: url,
-      receipt: transferReceipt.transaction.hash,
-      time: Math.ceil(new Date().getTime()/1000)
-    }
-
-    writeFileSync(recordsFile, JSON.stringify(records));
+    await pgClient.query(`
+      INSERT INTO records(account, link, receipt, time)
+      VALUES ($1::varchar, $2::varchar, $3::varchar, $4::int)
+    `, [
+      sendTo, 
+      url,
+      transferReceipt.transaction.hash,
+      Math.ceil(new Date().getTime()/1000)
+    ]);
 
     res.json({ success: true });
 

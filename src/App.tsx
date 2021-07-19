@@ -19,7 +19,9 @@ import {
   Divider,
   ListItem,
   useClipboard,
-  IconButton
+  IconButton,
+  Skeleton,
+  Stack
 } from '@chakra-ui/react';
 
 import { CopyIcon, CheckIcon, SmallCloseIcon } from '@chakra-ui/icons';
@@ -38,14 +40,17 @@ dayjs.extend(relativeTime);
 function Main() {
   const toast = useToast();
   const [listItems, setListItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSubmiting, setIsSubmiting] = useState(false);
   const [url, setUrl] = useState('');
 
   const getListItems = async () => {
+    setIsLoading(true);
     axios
       .get('/api/records')
       .then(res => res.data)
       .then(({ data }) => {
+        setIsLoading(false);
         setListItems(data);
       });
   }
@@ -102,8 +107,13 @@ function Main() {
           disabled={isSubmiting || !url}
           isLoading={isSubmiting}>Give me OCT</Button>
       </HStack>
-      <List mt={4} spacing={2}>
+
+      <List mt={4} spacing={2} h="120px">
         {
+          isLoading ?
+          <Stack>
+            <Skeleton height="20px" />
+          </Stack> :
           listItems.map(({ account, time, link }, idx) => (
             <>
               <ListItem key={`list-item-${idx}`} 
