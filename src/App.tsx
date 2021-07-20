@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   ChakraProvider,
   Box,
@@ -21,7 +21,13 @@ import {
   useClipboard,
   IconButton,
   Skeleton,
-  Stack
+  Stack,
+  AlertDialog,
+  AlertDialogHeader,
+  AlertDialogBody,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogFooter
 } from '@chakra-ui/react';
 
 import { CopyIcon } from '@chakra-ui/icons';
@@ -43,6 +49,8 @@ function Main() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmiting, setIsSubmiting] = useState(false);
   const [url, setUrl] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const cancelRef = useRef();
 
   const getListItems = async () => {
     setIsLoading(true);
@@ -85,6 +93,7 @@ function Main() {
             description: 'Request OCT success',
             status: 'success'
           });
+          setDialogOpen(true);
         } else {
           toast({
             position: 'top-right',
@@ -97,7 +106,12 @@ function Main() {
     setIsSubmiting(false);
   }
 
+  const onDialogClose = () => {
+    setDialogOpen(false);
+  }
+
   return (
+    <>
     <Container maxW="container.md" mb="24">
       <Center>
         <Heading>OCT Authenticated Faucet</Heading>
@@ -137,6 +151,33 @@ function Main() {
         }
       </List>
     </Container>
+    <AlertDialog
+      isOpen={dialogOpen}
+      leastDestructiveRef={cancelRef}
+      onClose={() => setDialogOpen(false)}
+    >
+      <AlertDialogOverlay>
+        <AlertDialogContent>
+          <AlertDialogHeader fontSize="lg" fontWeight="bold">
+            Tips
+          </AlertDialogHeader>
+          <AlertDialogBody>
+            Funded success! Check your wallet?
+          </AlertDialogBody>
+          <AlertDialogFooter>
+            <Button ref={cancelRef} onClick={onDialogClose}>
+              Cancel
+            </Button>
+            <Button colorScheme="teal" onClick={() => {
+              window.location.href = 'https://testnet.oct.network/#/wallet'
+            }} ml={3}>
+              Ok
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialogOverlay>
+    </AlertDialog>
+    </>
   );
 }
 
@@ -185,7 +226,6 @@ export function App() {
           </HStack>
         </Container>
       </Flex>
-      
     </ChakraProvider>
   );
 }
