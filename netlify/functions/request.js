@@ -113,7 +113,7 @@ exports.handler = async (req) => {
 
   try {
     const tweet = await getTweet(id);
-    const match = /\[(.*).testnet/i.exec(tweet);
+    const match = /([^\s:]*)\.testnet/i.exec(tweet);
     if (!match) {
       throw new Error('Not found near account');
     }
