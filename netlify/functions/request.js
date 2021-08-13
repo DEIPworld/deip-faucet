@@ -12,7 +12,6 @@ const dayjs = require('dayjs');
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
 
-const TOKEN_CONTRACT_NAME = 'oct-token.testnet';
 const DEFAULT_GAS = new BN('300000000000000');
 
 const faucetPrivKey = process.env.FAUCET_PRIV_KEY;
@@ -71,22 +70,50 @@ const getFaucetAccount = async () => {
   };
 }
 
-// async function createTable() {
- 
-//   const client = await pgPool.connect();
-//   await client.query(`
-//     CREATE TABLE records(
-//       id serial, 
-//       account varchar, 
-//       link varchar, 
-//       receipt varchar, 
-//       time int
-//     )
-//   `);
- 
-// }
+async function sendToken(tokenContract, sendTo, amount) {
+  const { account, near } = await getFaucetAccount();
+   
+  try {
+    const sendToAccount = new Account(near.connection, sendTo);
+    await sendToAccount.state();
+  } catch(err) {
+    throw new Error('Account not found');
+  }
+  
+  const contract = await new Contract(
+    account,
+    tokenContract,
+    {
+      viewMethods: ['ft_balance_of', 'storage_balance_of'],
+      changeMethods: ['ft_transfer', 'storage_deposit'],
+    }
+  );
 
-// createTable();
+  const storaged = await contract.storage_balance_of({ account_id: sendTo });
+  
+  if (!storaged) {
+    await account.functionCall({
+      contractId: tokenContract,
+      methodName: 'storage_deposit',
+      args: { account_id: sendTo },
+      gas: DEFAULT_GAS,
+      attachedDeposit: new BN('1250000000000000000000')
+    });
+  }
+
+  const transferReceipt = await account.functionCall({
+    contractId: tokenContract,
+    methodName: 'ft_transfer',
+    args: { 
+      receiver_id: sendTo,
+      amount
+    },
+    gas: DEFAULT_GAS,
+    attachedDeposit: 1
+  });
+
+  return transferReceipt.transaction.hash;
+}
 
 exports.handler = async (req) => {
   if (!req.body) {
@@ -137,46 +164,16 @@ exports.handler = async (req) => {
       }
     }
 
-    const { account, near } = await getFaucetAccount();
-   
-    try {
-      const sendToAccount = new Account(near.connection, sendTo);
-      await sendToAccount.state();
-    } catch(err) {
-      throw new Error('Account not found');
-    }
-   
-    const tokenContract = await new Contract(
-      account,
-      TOKEN_CONTRACT_NAME,
-      {
-        viewMethods: ['ft_balance_of', 'storage_balance_of'],
-        changeMethods: ['ft_transfer', 'storage_deposit'],
-      }
+    let hash = await sendToken(
+      'oct-token.testnet', 
+      sendTo, 
+      new BN(200).mul(new BN(10).pow(new BN(24))).toString()
     );
-
-    const storaged = await tokenContract.storage_balance_of({ account_id: sendTo });
-    
-    if (!storaged) {
-      await account.functionCall({
-        contractId: TOKEN_CONTRACT_NAME,
-        methodName: 'storage_deposit',
-        args: { account_id: sendTo },
-        gas: DEFAULT_GAS,
-        attachedDeposit: new BN('1250000000000000000000')
-      });
-    }
-
-    const transferReceipt = await account.functionCall({
-      contractId: TOKEN_CONTRACT_NAME,
-      methodName: 'ft_transfer',
-      args: { 
-        receiver_id: sendTo,
-        amount: new BN(10).mul(new BN(10).pow(new BN(24))).toString()
-      },
-      gas: DEFAULT_GAS,
-      attachedDeposit: 1
-    });
+    hash = hash + '|' + await sendToken(
+      'usdc.testnet', 
+      sendTo,
+      new BN(10).mul(new BN(10).pow(new BN(6))).toString()
+    );
     
     await pgClient.query(`
       INSERT INTO records(account, link, receipt, time)
@@ -184,7 +181,7 @@ exports.handler = async (req) => {
     `, [
       sendTo, 
       url,
-      transferReceipt.transaction.hash,
+      hash,
       Math.ceil(new Date().getTime()/1000)
     ]);
 

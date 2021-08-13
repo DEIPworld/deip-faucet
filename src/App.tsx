@@ -221,7 +221,7 @@ export function App() {
                 }
               </Button>
               <br/>
-              Copy-paste the tweets URL into the above input box and get your OCT. Each account can get 10 OCT every 24 hours.
+              Copy-paste the tweets URL into the above input box and get your OCT(or USDC). Each account can get 10 OCT(or USDC) every 24 hours.
             </Text>
           </HStack>
         </Container>
