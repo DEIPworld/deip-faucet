@@ -164,16 +164,18 @@ exports.handler = async (req) => {
       }
     }
 
-    let hash = await sendToken(
-      'oct-token.testnet', 
-      sendTo, 
-      new BN(200).mul(new BN(10).pow(new BN(24))).toString()
-    );
-    hash = hash + '|' + await sendToken(
-      'usdc.testnet', 
-      sendTo,
-      new BN(10).mul(new BN(10).pow(new BN(6))).toString()
-    );
+    const [hash1, hash2] = await Promise.all([
+      sendToken(
+        'oct-token.testnet', 
+        sendTo, 
+        new BN(200).mul(new BN(10).pow(new BN(24))).toString()
+      ),
+      sendToken(
+        'usdc.testnet', 
+        sendTo,
+        new BN(10).mul(new BN(10).pow(new BN(6))).toString()
+      )
+    ]);
     
     await pgClient.query(`
       INSERT INTO records(account, link, receipt, time)
@@ -181,10 +183,10 @@ exports.handler = async (req) => {
     `, [
       sendTo, 
       url,
-      hash,
+      hash1 + '|' + hash2,
       Math.ceil(new Date().getTime()/1000)
     ]);
-
+    
     return { 
       statusCode: 200,
       body: JSON.stringify({
