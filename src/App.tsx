@@ -102,6 +102,14 @@ function Main() {
             status: 'error'
           });
         }
+      })
+      .catch(err => {
+        toast({
+          position: 'top-right',
+          title: 'Error',
+          description: 'Reuqst error, please retry!',
+          status: 'error'
+        });
       });
     setIsSubmiting(false);
   }
