@@ -168,7 +168,7 @@ exports.handler = async (req) => {
       sendToken(
         'oct.dev_oct_relay.testnet', 
         sendTo, 
-        new BN(200).mul(new BN(10).pow(new BN(24))).toString()
+        new BN(200).mul(new BN(10).pow(new BN(18))).toString()
       ),
       sendToken(
         'usdc.testnet', 
