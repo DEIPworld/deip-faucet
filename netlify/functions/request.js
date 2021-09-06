@@ -1,5 +1,5 @@
 
-const { connect, keyStores, Contract, utils, Account, WalletConnection, Connection } = require('near-api-js');
+const { connect, keyStores, Contract, utils, Account } = require('near-api-js');
 
 const axios = require('axios');
 const { Pool } = require('pg');
@@ -165,11 +165,6 @@ exports.handler = async (req) => {
     }
 
     const [hash1, hash2] = await Promise.all([
-      sendToken(
-        'oct.dev_oct_relay.testnet', 
-        sendTo, 
-        new BN(200).mul(new BN(10).pow(new BN(18))).toString()
-      ),
       sendToken(
         'oct.beta_oct_relay.testnet', 
         sendTo, 

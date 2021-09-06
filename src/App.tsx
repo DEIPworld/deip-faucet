@@ -177,7 +177,7 @@ function Main() {
               Cancel
             </Button>
             <Button colorScheme="teal" onClick={() => {
-              window.location.href = 'https://testnet.oct.network/#/wallet'
+              window.location.href = 'https://beatnet.oct.network/#/wallet'
             }} ml={3}>
               Ok
             </Button>
