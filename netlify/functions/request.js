@@ -171,6 +171,11 @@ exports.handler = async (req) => {
         new BN(200).mul(new BN(10).pow(new BN(18))).toString()
       ),
       sendToken(
+        'oct.beta_oct_relay.testnet', 
+        sendTo, 
+        new BN(200).mul(new BN(10).pow(new BN(18))).toString()
+      ),
+      sendToken(
         'usdc.testnet', 
         sendTo,
         new BN(10).mul(new BN(10).pow(new BN(6))).toString()
