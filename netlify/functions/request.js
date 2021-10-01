@@ -149,7 +149,7 @@ exports.handler = async (req) => {
     const pgClient = await pgPool.connect();
 
     const { rows } = await pgClient.query(
-      'SELECT * FROM records WHERE account = $1 ORDER BY id desc LIMIT 1', 
+      'SELECT * FROM records WHERE account = $1 ORDER BY time desc LIMIT 1', 
       [sendTo]
     );
 
@@ -159,8 +159,6 @@ exports.handler = async (req) => {
       if (dayjs().diff(time, 'h') < 24) {
         const d = dayjs.duration(time.add(1, 'days').diff(dayjs()))['$d'];
         throw new Error(`${d.hours}h ${d.minutes}m ${d.seconds}s until next allowance`);
-      } else if (record.tid === id) {
-        throw new Error('Tweet id was used last time');
       }
     }
 
@@ -168,7 +166,7 @@ exports.handler = async (req) => {
       sendToken(
         'oct.beta_oct_relay.testnet', 
         sendTo, 
-        new BN(1).mul(new BN(10).pow(new BN(18))).toString()
+        new BN(10).mul(new BN(10).pow(new BN(18))).toString()
       ),
       sendToken(
         'usdc.testnet', 
@@ -178,13 +176,15 @@ exports.handler = async (req) => {
     ]);
     
     await pgClient.query(`
-      INSERT INTO records(account, link, receipt, time)
-      VALUES ($1::varchar, $2::varchar, $3::varchar, $4::int)
+      INSERT INTO records(account, link, receipt, time, tid, ip)
+      VALUES ($1::varchar, $2::varchar, $3::varchar, $4::int, $5::varchar, $6::varchar)
     `, [
       sendTo, 
       url,
       hash1 + '|' + hash2,
-      Math.ceil(new Date().getTime()/1000)
+      Math.ceil(new Date().getTime()/1000),
+      id,
+      req.headers['x-nf-client-connection-ip']
     ]);
     
     return { 
