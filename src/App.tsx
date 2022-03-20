@@ -90,7 +90,7 @@ function Main() {
           toast({
             position: 'top-right',
             title: 'Tips',
-            description: 'Request OCT success',
+            description: 'Request DEIP success',
             status: 'success'
           });
           setDialogOpen(true);
@@ -122,14 +122,14 @@ function Main() {
     <>
     <Container maxW="container.md" mb="24">
       <Center>
-        <Heading>OCT Authenticated Faucet</Heading>
+        <Heading>DEIP Authenticated Faucet</Heading>
       </Center>
       <HStack spacing={15} mt="12">
         <Input size="lg" onChange={e => setUrl(e.target.value)}
           placeholder="Please paste the twitter link which contains your Near account" />
         <Button size="lg" colorScheme="teal" onClick={onRequest}
           disabled={isSubmiting || !url}
-          isLoading={isSubmiting}>Give me OCT</Button>
+          isLoading={isSubmiting}>Give me DEIP</Button>
       </HStack>
 
       <List mt={4} spacing={2} h="120px">
@@ -177,7 +177,7 @@ function Main() {
               Cancel
             </Button>
             <Button colorScheme="teal" onClick={() => {
-              window.location.href = 'https://beatnet.oct.network/#/wallet'
+              window.location.href = 'https://wallet.testnet.near.org'
             }} ml={3}>
               Ok
             </Button>
@@ -191,7 +191,7 @@ function Main() {
 
 export function App() {
   
-  const { hasCopied, onCopy } = useClipboard(`Apply for OCT tokens: [replace with your account]. Octopus is a multi-chain network that provides leased security and interoperability to Substrate appchains: @oct_network`);
+  const { hasCopied, onCopy } = useClipboard(`Apply for DEIP tokens: [replace with your NEAR testnet account]. DEIP is the first Web 3.0 domain-specific protocol for tokenization and governance of high-value intangible assets: @DEIP_World`);
 
   return (
     <ChakraProvider theme={theme}>
@@ -210,7 +210,7 @@ export function App() {
             <Text fontSize="xl">How to fund</Text>
           </Center>
           <Text mt="4" color="gray" fontSize="sm">
-            This faucet is running on the Octopus testnet. 
+            This faucet is running on the DEIP testnet. 
             To prevent malicious actors from exhausting all funds, requests are 
             tied to Twitter social network accounts. 
             Anyone having a Twitter account may request funds within the permitted limits.
@@ -229,7 +229,7 @@ export function App() {
                 }
               </Button>
               <br/>
-              Copy-paste the tweets URL into the above input box and get your OCT(or USDC). Each account can get 10 OCT(or USDC) every 24 hours.
+              Copy-paste the tweets URL into the above input box and get your DEIP. Each account can get 10 DEIP every 24 hours.
             </Text>
           </HStack>
         </Container>
