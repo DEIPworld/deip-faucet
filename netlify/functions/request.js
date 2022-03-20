@@ -54,7 +54,7 @@ const getTweet = async (id) => {
 const getFaucetAccount = async () => {
   const keyPair = utils.KeyPair.fromString(faucetPrivKey);
   const keyStore = new keyStores.InMemoryKeyStore();
-  keyStore.setKey('testnet', 'oct-faucet.testnet', keyPair);
+  keyStore.setKey('testnet', 'deip-faucet.testnet', keyPair);
 
   const near = await connect({
     networkId: 'testnet',
@@ -65,7 +65,7 @@ const getFaucetAccount = async () => {
   });
 
   return {
-    account: await near.account('oct-faucet.testnet'),
+    account: await near.account('deip-faucet.testnet'),
     near
   };
 }
@@ -162,16 +162,11 @@ exports.handler = async (req) => {
       }
     }
 
-    const [hash1, hash2] = await Promise.all([
+    const [hash1] = await Promise.all([
       sendToken(
-        'oct.beta_oct_relay.testnet', 
+        'deipn.testnet', 
         sendTo, 
         new BN(10).mul(new BN(10).pow(new BN(18))).toString()
-      ),
-      sendToken(
-        'usdc.testnet', 
-        sendTo,
-        new BN(10).mul(new BN(10).pow(new BN(6))).toString()
       )
     ]);
     
@@ -181,7 +176,7 @@ exports.handler = async (req) => {
     `, [
       sendTo, 
       url,
-      hash1 + '|' + hash2,
+      hash1,
       Math.ceil(new Date().getTime()/1000),
       id,
       req.headers['x-nf-client-connection-ip']
