@@ -81,12 +81,12 @@ const getTweet = async (id) => {
   }).then((response) => {
     // console.log("response => ", JSON.stringify(response, null, 2));
     const data = response;
-    const { data: tweets } = data;
-    console.log("tweets => ", tweets);
+    const { data: twitterResponse } = data;
+    console.log("twitterResponse => ", twitterResponse);
 
-    if (!tweets.data || !tweets.data.length) 
+    if (!twitterResponse.data || !twitterResponse.data.length) 
       throw new Error(`Tweet ${id} is not found`);
-    const [tweet] = tweets.data;
+    const [tweet] = twitterResponse.data;
     console.log("debug checkpoint 11");
     return tweet.text
   });
@@ -119,6 +119,8 @@ async function sendToken(tokenContract, sendTo, amount) {
     const sendToAccount = new Account(near.connection, sendTo);
     await sendToAccount.state();
   } catch(err) {
+    console.log(err.message);
+    console.log(err);
     throw new Error('Account not found');
   }
 
