@@ -42,6 +42,10 @@ const getGuestToken = async () => {
   }).then(({ data }) => {
     console.log("debug checkpoint 9");
     return data.guest_token
+  }).catch((err) => {
+    console.log(err.message);
+    console.log("debug error 1");
+    throw err;
   });
 }
 
@@ -227,7 +231,11 @@ exports.handler = async (req) => {
     }
 
   } catch(err) {
+    console.log("debug error 2");
+
+    console.log(err.message);
     console.log(err);
+
     return {
       statusCode: 200,
       body: JSON.stringify({
