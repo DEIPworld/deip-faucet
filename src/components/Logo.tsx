@@ -7,6 +7,6 @@ import logoWhite from 'assets/deip_logo_white.png';
 export function Logo() {
   const { colorMode } = useColorMode();
   return (
-    <Image src={colorMode === 'light' ? logoBlack : logoWhite} alt="DEIP Logo" />
+    <Image src={colorMode === 'light' ? logoBlack : logoWhite} alt="DEIP Logo" marginTop="15px" marginBottom="15px" />
   );
 }

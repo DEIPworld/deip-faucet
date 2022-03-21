@@ -204,11 +204,12 @@ exports.handler = async (req) => {
     const match = /\[(.*?)\]/i.exec(tweet);
     console.log("match", match);
 
-    const username = match[2];
+    const username = match[1];
+    console.log("username " + username);
+
     if (!username || username.indexOf('.testnet') == -1) {
       throw new Error('Not found near account');
     }
-    console.log("username " + username);
 
     const sendTo = username;
     console.log("debug checkpoint 13");
