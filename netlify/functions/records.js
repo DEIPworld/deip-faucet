@@ -14,13 +14,9 @@ const pgPool = new Pool({
 
 exports.handler = async (req) => {
   const pgClient = await pgPool.connect();
-
-  console.log("debug checkpoint 1");
-
   const { rows } = await pgClient.query(
     'SELECT * FROM records ORDER BY id desc LIMIT 3', 
   );
-  console.log("debug checkpoint 2");
 
   return {
     statusCode: 200,

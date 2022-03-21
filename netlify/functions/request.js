@@ -29,49 +29,7 @@ const pgPool = new Pool({
   max: 20
 });
 
-// const getGuestToken = async () => {
-//   console.log("debug checkpoint 8");
-//   console.log("twitterAuth ===>", twitterAuth);
-
-//   return axios({
-//     url: `https://api.twitter.com/1.1/guest/activate.json`,
-//     method: 'post',
-//     headers: {
-//       'authorization': twitterAuth
-//     }
-//   }).then(({ data }) => {
-//     console.log("debug checkpoint 9");
-//     return data.guest_token
-//   }).catch((err) => {
-//     console.log(err.message);
-//     console.log("debug error 1");
-//     throw err;
-//   });
-// }
-
-// const getTweet = async (id) => {
-//   console.log("debug checkpoint 7");
-
-//   const guestToken = await getGuestToken();
-//   console.log("debug checkpoint 10");
-
-//   return axios({
-//     url: `https://api.twitter.com/1.1/statuses/show.json?id=${id}`,
-//     method: 'get',
-//     headers: {
-//       'authorization': twitterAuth,
-//       'x-guest-token': guestToken
-//     }
-//   }).then(({ data }) => {
-//     console.log("debug checkpoint 11");
-//     return data.text
-//   });
-// }
-
-
 const getTweet = async (id) => {
-  console.log("debug checkpoint 7");
-
   return axios({
     url: `https://api.twitter.com/2/tweets?ids=${id}`,
     method: 'get',
@@ -79,15 +37,11 @@ const getTweet = async (id) => {
       'authorization': twitterAuth
     }
   }).then((response) => {
-    // console.log("response => ", JSON.stringify(response, null, 2));
     const data = response;
     const { data: twitterResponse } = data;
-    console.log("twitterResponse => ", twitterResponse);
-
     if (!twitterResponse.data || !twitterResponse.data.length) 
       throw new Error(`Tweet ${id} is not found`);
     const [tweet] = twitterResponse.data;
-    console.log("debug checkpoint 11");
     return tweet.text
   });
 }
@@ -113,19 +67,14 @@ const getFaucetAccount = async () => {
 
 async function sendToken(tokenContract, sendTo, amount) {
   const { account, near } = await getFaucetAccount();
-  console.log("debug checkpoint 17");
 
   try {
     const sendToAccount = new Account(near.connection, sendTo);
     await sendToAccount.state();
   } catch(err) {
-    console.log(err.message);
     console.log(err);
     throw new Error('Account not found');
   }
-
-  console.log("debug checkpoint 18");
-
   
   const contract = await new Contract(
     account,
@@ -139,7 +88,6 @@ async function sendToken(tokenContract, sendTo, amount) {
   const storaged = await contract.storage_balance_of({ account_id: sendTo });
   
   if (!storaged) {
-    console.log("debug checkpoint 19");
     await account.functionCall({
       contractId: tokenContract,
       methodName: 'storage_deposit',
@@ -148,8 +96,6 @@ async function sendToken(tokenContract, sendTo, amount) {
       attachedDeposit: new BN('1250000000000000000000')
     });
   }
-
-  console.log("debug checkpoint 20");
 
   const transferReceipt = await account.functionCall({
     contractId: tokenContract,
@@ -162,15 +108,11 @@ async function sendToken(tokenContract, sendTo, amount) {
     attachedDeposit: 1
   });
 
-  console.log("debug checkpoint 21");
-
   return transferReceipt.transaction.hash;
 }
 
 exports.handler = async (req) => {
-  console.log("debug checkpoint 1");
   if (!req.body) {
-    console.log("debug checkpoint 2");
     return {
       statusCode: 200,
       body: JSON.stringify({ 
@@ -180,10 +122,8 @@ exports.handler = async (req) => {
     }
   }
   const { url } = JSON.parse(req.body);
-  console.log("debug checkpoint 3");
   const idMatch = /status\/(\d+)/ig.exec(url || '');
   if (!idMatch) {
-    console.log("debug checkpoint 4");
     return {
       statusCode: 200,
       body: JSON.stringify({
@@ -193,38 +133,25 @@ exports.handler = async (req) => {
     };
   }
   const id = idMatch[1];
-  console.log("debug checkpoint 5");
 
   try {
-    console.log("debug checkpoint 6");
     const tweet = await getTweet(id);
-    console.log("debug checkpoint 12");
-
-    // const match = /([^\s:]*)\.testnet/i.exec(tweet);
     const match = /\[(.*?)\]/i.exec(tweet);
-    console.log("match", match);
-
     const username = match[1];
-    console.log("username " + username);
 
     if (!username || username.indexOf('.testnet') == -1) {
       throw new Error('Not found near account');
     }
 
     const sendTo = username;
-    console.log("debug checkpoint 13");
-
     const pgClient = await pgPool.connect();
 
     const { rows } = await pgClient.query(
       'SELECT * FROM records WHERE account = $1 ORDER BY time desc LIMIT 1', 
       [sendTo]
     );
-    console.log("debug checkpoint 14");
 
     if (rows.length) {
-      console.log("debug checkpoint 15");
-
       const record = rows[0];
       const time = dayjs(record.time * 1000);
       if (dayjs().diff(time, 'h') < 24) {
@@ -232,7 +159,6 @@ exports.handler = async (req) => {
         throw new Error(`${d.hours}h ${d.minutes}m ${d.seconds}s until next allowance`);
       }
     }
-    console.log("debug checkpoint 16");
 
     const [hash1] = await Promise.all([
       sendToken(
@@ -241,7 +167,6 @@ exports.handler = async (req) => {
         new BN(10).mul(new BN(10).pow(new BN(18))).toString()
       )
     ]);
-    console.log("debug checkpoint 22");
 
     await pgClient.query(`
       INSERT INTO records(account, link, receipt, time, tid, ip)
@@ -254,7 +179,6 @@ exports.handler = async (req) => {
       id,
       req.headers['x-nf-client-connection-ip']
     ]);
-    console.log("debug checkpoint 23");
     
     return { 
       statusCode: 200,
@@ -264,11 +188,7 @@ exports.handler = async (req) => {
     }
 
   } catch(err) {
-    console.log("debug error 2");
-
-    console.log(err.message);
     console.log(err);
-
     return {
       statusCode: 200,
       body: JSON.stringify({
