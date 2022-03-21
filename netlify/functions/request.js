@@ -79,8 +79,11 @@ const getTweet = async (id) => {
       'authorization': twitterAuth
     }
   }).then(({ data }) => {
+    if (!data || !data.length) 
+      throw new Error(`Tweet ${id} is not found`);
+    const [tweet] = data;
     console.log("debug checkpoint 11");
-    return data.text
+    return tweet.text
   });
 }
 
