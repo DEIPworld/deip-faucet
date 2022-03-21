@@ -84,9 +84,9 @@ const getTweet = async (id) => {
     const { data: tweets } = data;
     console.log("tweets => ", tweets);
 
-    if (!tweets || !tweets.length) 
+    if (!tweets.data || !tweets.data.length) 
       throw new Error(`Tweet ${id} is not found`);
-    const [tweet] = tweets;
+    const [tweet] = tweets.data;
     console.log("debug checkpoint 11");
     return tweet.text
   });
