@@ -29,38 +29,54 @@ const pgPool = new Pool({
   max: 20
 });
 
-const getGuestToken = async () => {
-  console.log("debug checkpoint 8");
-  console.log("twitterAuth ===>", twitterAuth);
+// const getGuestToken = async () => {
+//   console.log("debug checkpoint 8");
+//   console.log("twitterAuth ===>", twitterAuth);
 
-  return axios({
-    url: `https://api.twitter.com/1.1/guest/activate.json`,
-    method: 'post',
-    headers: {
-      'authorization': twitterAuth
-    }
-  }).then(({ data }) => {
-    console.log("debug checkpoint 9");
-    return data.guest_token
-  }).catch((err) => {
-    console.log(err.message);
-    console.log("debug error 1");
-    throw err;
-  });
-}
+//   return axios({
+//     url: `https://api.twitter.com/1.1/guest/activate.json`,
+//     method: 'post',
+//     headers: {
+//       'authorization': twitterAuth
+//     }
+//   }).then(({ data }) => {
+//     console.log("debug checkpoint 9");
+//     return data.guest_token
+//   }).catch((err) => {
+//     console.log(err.message);
+//     console.log("debug error 1");
+//     throw err;
+//   });
+// }
+
+// const getTweet = async (id) => {
+//   console.log("debug checkpoint 7");
+
+//   const guestToken = await getGuestToken();
+//   console.log("debug checkpoint 10");
+
+//   return axios({
+//     url: `https://api.twitter.com/1.1/statuses/show.json?id=${id}`,
+//     method: 'get',
+//     headers: {
+//       'authorization': twitterAuth,
+//       'x-guest-token': guestToken
+//     }
+//   }).then(({ data }) => {
+//     console.log("debug checkpoint 11");
+//     return data.text
+//   });
+// }
+
 
 const getTweet = async (id) => {
   console.log("debug checkpoint 7");
 
-  const guestToken = await getGuestToken();
-  console.log("debug checkpoint 10");
-
   return axios({
-    url: `https://api.twitter.com/1.1/statuses/show.json?id=${id}`,
+    url: `https://api.twitter.com/2/tweets?ids=${id}`,
     method: 'get',
     headers: {
-      'authorization': twitterAuth,
-      'x-guest-token': guestToken
+      'authorization': twitterAuth
     }
   }).then(({ data }) => {
     console.log("debug checkpoint 11");
