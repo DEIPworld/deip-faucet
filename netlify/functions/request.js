@@ -79,7 +79,7 @@ const getTweet = async (id) => {
       'authorization': twitterAuth
     }
   }).then((response) => {
-    console.log("response => ", JSON.stringify(response, null, 2));
+    // console.log("response => ", JSON.stringify(response, null, 2));
 
     const { data } = response;
     console.log("data => ", JSON.stringify(data, null, 2));
