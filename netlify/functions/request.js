@@ -200,11 +200,17 @@ exports.handler = async (req) => {
     const tweet = await getTweet(id);
     console.log("debug checkpoint 12");
 
-    const match = /([^\s:]*)\.testnet/i.exec(tweet);
-    if (!match) {
+    // const match = /([^\s:]*)\.testnet/i.exec(tweet);
+    const match = /\[(.*?)\]/i.exec(tweet);
+    console.log("match", match);
+
+    const username = match[2];
+    if (!username || username.indexOf('.testnet') == -1) {
       throw new Error('Not found near account');
     }
-    const sendTo = match[1] + '.testnet';
+    console.log("username " + username);
+
+    const sendTo = username;
     console.log("debug checkpoint 13");
 
     const pgClient = await pgPool.connect();
