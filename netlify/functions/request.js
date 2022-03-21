@@ -78,7 +78,11 @@ const getTweet = async (id) => {
     headers: {
       'authorization': twitterAuth
     }
-  }).then(({ data }) => {
+  }).then((response) => {
+    console.log("response => ", JSON.stringify(response, null, 2));
+
+    const { data } = response;
+    console.log("data => ", JSON.stringify(data, null, 2));
     if (!data || !data.length) 
       throw new Error(`Tweet ${id} is not found`);
     const [tweet] = data;
