@@ -81,9 +81,8 @@ const getTweet = async (id) => {
   }).then((response) => {
     // console.log("response => ", JSON.stringify(response, null, 2));
     const data = response;
-    console.log("data => ", JSON.stringify(data, null, 2));
     const { data: tweets } = data;
-    console.log("tweets => ", JSON.stringify(tweets, null, 2));
+    console.log("tweets => ", tweets);
 
     if (!tweets || !tweets.length) 
       throw new Error(`Tweet ${id} is not found`);
