@@ -9,7 +9,8 @@ const pgPool = new Pool({
   password: match[2],
   database: match[4],
   port: 5432,
-  max: 20
+  max: 20,
+  ssl: true
 });
 
 exports.handler = async (req) => {
