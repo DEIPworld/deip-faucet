@@ -27,7 +27,7 @@ const pgPool = new Pool({
   database: match[4],
   port: 5432,
   max: 20,
-  connectionTimeoutMillis: 30000
+  connectionTimeoutMillis: 10000
 });
 
 const getTweet = async (id) => {
@@ -180,6 +180,8 @@ exports.handler = async (req) => {
       id,
       req.headers['x-nf-client-connection-ip']
     ]);
+
+    pgClient.release();
     
     return { 
       statusCode: 200,
@@ -189,6 +191,8 @@ exports.handler = async (req) => {
     }
 
   } catch(err) {
+    pgClient.release();
+
     console.log(err);
     return {
       statusCode: 200,
