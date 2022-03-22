@@ -191,8 +191,6 @@ exports.handler = async (req) => {
     }
 
   } catch(err) {
-    pgClient.release();
-
     console.log(err);
     return {
       statusCode: 200,
