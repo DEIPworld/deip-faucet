@@ -103,13 +103,23 @@ function Main() {
           });
         }
       })
-      .catch(err => {
-        toast({
-          position: 'top-right',
-          title: 'Error',
-          description: 'Reuqst error, please retry!',
-          status: 'error'
-        });
+      .catch((err) => {
+        if (err.message === "Request failed with status code 502") {
+          // https://docs.netlify.com/functions/overview/#default-deployment-options
+          toast({
+            position: 'top-right',
+            title: 'Request processing time increased the response timeout limit',
+            description: 'Request has been sent, but its processing time increased timeout limit. Please check your wallet for DEIP tokens, and retry if you have not received them.',
+            status: 'warning'
+          });
+        } else {
+          toast({
+            position: 'top-right',
+            title: 'Error',
+            description: 'Request error, please retry!',
+            status: 'error'
+          });
+        }
       });
     setIsSubmiting(false);
   }
