@@ -26,7 +26,8 @@ const pgPool = new Pool({
   password: match[2],
   database: match[4],
   port: 5432,
-  max: 20
+  max: 20,
+  connectionTimeoutMillis: 30000
 });
 
 const getTweet = async (id) => {
